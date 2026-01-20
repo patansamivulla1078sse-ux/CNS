@@ -1,0 +1,35 @@
+def permute(x, table):
+    return ''.join(x[i-1] for i in table)
+
+def shift(x, s):
+    return x[s:] + x[:s]
+
+def gkey(k):
+    k = permute(k, pc1)
+    l, r = k[:28], k[28:]
+    keys = []
+    for s in shifts:
+        l, r = shift(l, s), shift(r, s)
+        keys.append(permute(l + r, pc2))
+    return keys[::-1]  
+
+def f(r, k):
+    r = permute(r, e)
+    r = bin(int(r, 2) ^ int(k, 2))[2:].zfill(48)
+    return permute(r, p)
+
+def d(ct, k):
+    ct = permute(ct, ip)
+    l, r = ct[:32], ct[32:]
+    keys = gkey(k)
+
+    for i in range(16):
+        l, r = r, bin(int(l, 2) ^ int(f(r, keys[i]), 2))[2:].zfill(32)
+
+    return permute(r + l, ipinv)
+
+ct = "1100110000000000110011001111111111001100000000001100110011111111"
+k = "0001001100110100010101110111100110011011101111001101111111110001"
+
+pt = d(ct, k)
+print("decrypted plaintext:", pt)
